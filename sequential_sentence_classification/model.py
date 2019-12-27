@@ -123,8 +123,10 @@ class SeqClassificationModel(Model):
                     labels_mask = labels != 0.0  # mask for all the labels in the batch (no padding)
                 else:
                     labels_mask = labels != -1  # mask for all the labels in the batch (no padding)
-
+                print(labels.shape)
                 labels = labels[labels_mask]  # given batch_size x num_sentences_per_example return num_sentences_per_batch
+                print(labels.shape)
+                print(labels_mask.shape)
                 assert labels.dim() == 1
                 if confidences is not None:
                     confidences = confidences[labels_mask]
