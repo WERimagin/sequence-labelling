@@ -106,10 +106,10 @@ class SeqClassificationModel(Model):
             # and arrange them in one list. It does the same for the labels and confidences.
             # TODO: replace 103 with '[SEP]'
             sentences_mask = sentences['bert'] == 103  # mask for all the SEP tokens in the batch
+            #(batch,sentence,sentence_size?,hidden)->(sentence_size,hidden)
+            #padが除外された二次元が変える
             embedded_sentences = embedded_sentences[sentences_mask]  # given batch_size x num_sentences_per_example x sent_len x vector_len
                                                                         # returns num_sentences_per_batch x vector_len
-            print(sentences_mask.shape)
-            print(embedded_sentences.shape)
             assert embedded_sentences.dim() == 2
             num_sentences = embedded_sentences.shape[0]
             # for the rest of the code in this model to work, think of the data we have as one example
@@ -123,10 +123,9 @@ class SeqClassificationModel(Model):
                     labels_mask = labels != 0.0  # mask for all the labels in the batch (no padding)
                 else:
                     labels_mask = labels != -1  # mask for all the labels in the batch (no padding)
-                print(labels.shape)
+                #(batch,sentence)->(batch*sentence-padding)
+                #paddingされたところは除外された一次元のtensorが返る
                 labels = labels[labels_mask]  # given batch_size x num_sentences_per_example return num_sentences_per_batch
-                print(labels.shape)
-                print(labels_mask.shape)
                 assert labels.dim() == 1
                 if confidences is not None:
                     confidences = confidences[labels_mask]
@@ -177,10 +176,13 @@ class SeqClassificationModel(Model):
         label_logits = self.time_distributed_aggregate_feedforward(embedded_sentences)
         # label_logits: batch_size, num_sentences, num_labels
 
+        #softmaxで確率を出す
         if self.labels_are_scores:
             label_probs = label_logits
         else:
             label_probs = torch.nn.functional.softmax(label_logits, dim=-1)
+            print(3)
+        print(label_probs.shape)
 
         # Create output dictionary for the trainer
         # Compute loss and epoch metrics
@@ -188,6 +190,7 @@ class SeqClassificationModel(Model):
 
         # =====================================================================
 
+        #crfを使う場合
         if self.with_crf:
             # Layer 4 = CRF layer across labels of sentences in an abstract
             mask_sentences = (labels != -1)
