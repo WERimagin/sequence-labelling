@@ -97,6 +97,7 @@ class SeqClassificationModel(Model):
         embedded_sentences = self.text_field_embedder(sentences)
         mask = get_text_field_mask(sentences, num_wrapping_dims=1).float()
         batch_size, num_sentences, _, _ = embedded_sentences.size()
+        print("start")
         print(embedded_sentences.shape)
         print(mask.shape)
 
