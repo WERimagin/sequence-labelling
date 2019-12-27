@@ -97,6 +97,8 @@ class SeqClassificationModel(Model):
         embedded_sentences = self.text_field_embedder(sentences)
         mask = get_text_field_mask(sentences, num_wrapping_dims=1).float()
         batch_size, num_sentences, _, _ = embedded_sentences.size()
+        print(embedded_sentences.shape)
+        print(mask.shape)
 
         if self.use_sep:
             # The following code collects vectors of the SEP tokens from all the examples in the batch,
@@ -105,6 +107,7 @@ class SeqClassificationModel(Model):
             sentences_mask = sentences['bert'] == 103  # mask for all the SEP tokens in the batch
             embedded_sentences = embedded_sentences[sentences_mask]  # given batch_size x num_sentences_per_example x sent_len x vector_len
                                                                         # returns num_sentences_per_batch x vector_len
+            print(embedded_sentences.shape)
             assert embedded_sentences.dim() == 2
             num_sentences = embedded_sentences.shape[0]
             # for the rest of the code in this model to work, think of the data we have as one example
@@ -222,7 +225,7 @@ class SeqClassificationModel(Model):
                     label_name = self.vocab.get_token_from_index(namespace='labels', index=label_index)
                     metric = self.label_f1_metrics[label_name]
                     metric(flattened_probs, flattened_gold, mask=evaluation_mask)
-        
+
         if labels is not None:
             output_dict["loss"] = label_loss
         output_dict['action_logits'] = label_logits
