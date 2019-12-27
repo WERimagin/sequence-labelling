@@ -105,7 +105,7 @@ class SeqClassificationModel(Model):
             # The following code collects vectors of the SEP tokens from all the examples in the batch,
             # and arrange them in one list. It does the same for the labels and confidences.
             # TODO: replace 103 with '[SEP]'
-            print(sentences.shape)
+            print(sentences.shape["bert"])
             sentences_mask = sentences['bert'] == 103  # mask for all the SEP tokens in the batch
             #(batch,sentence,sentence_size?,hidden)->(sentence_size,hidden)
             #padが除外された二次元が変える
